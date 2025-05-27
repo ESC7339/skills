@@ -100,9 +100,9 @@ run('mount', ['-o', 'loop', inputISO, isoMount]);
 run('cp', ['-a', `${isoMount}/.`, isoRoot]);
 
 console.log('[INFO] Placeholder: chroot patching to be implemented...');
-// TODO: unsquashfs, chroot, patching, resquash
+// unsquashfs, chroot, patching, resquash
 
 console.log('[INFO] Placeholder: writing final ISO...');
-// TODO: xorriso or genisoimage invocation
+// xorriso or genisoimage invocation
 
 console.log('[INFO] Build completed.');
