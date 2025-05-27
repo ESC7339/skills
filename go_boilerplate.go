@@ -159,10 +159,10 @@ func main() {
 	runCommand("cp", "-a", isoMount+"/.", isoRoot)
 
 	logInfo("Preparing chroot patching (placeholder)...")
-	// TODO: unsquashfs + patch logic here
+	//  unsquashfs + patch logic here
 
 	logInfo("Writing final image (placeholder): " + outputImage)
-	// TODO: xorriso/genisoimage logic here
+	//  xorriso/genisoimage logic here
 
 	logInfo("Completed successfully.")
 }
