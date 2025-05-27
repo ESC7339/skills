@@ -128,13 +128,13 @@ command -v tput     >/dev/null || error "tput is required for terminal width det
 #################
 # Main Logic    #
 #################
-# Placeholder block
+
 log "Begin processing input: $INPUT"
-# Example: run "cp -a \"$INPUT\" \"$WORKDIR/\""
-# This boiler plate is used to illustrate how to properly form the environment for ease of development and quick iteration.
+# USAGE: run "cp -a \"$INPUT\" \"$WORKDIR/\""
+
 
 
 #################
-# Final Message #
+# Exit Logic #
 #################
 log "Operation completed successfully."
