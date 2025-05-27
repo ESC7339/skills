@@ -1,0 +1,42 @@
+{
+  "iso": {
+    "input_path": "/isos/debian-12.5.0-amd64-netinst.iso",
+    "output_path": "/builds/debian-custom.iso",
+    "workdir": "/tmp/iso-custom-work",
+    "mount_dir": "/tmp/iso-custom-work/mnt",
+    "extract_dir": "/tmp/iso-custom-work/extracted",
+    "squashfs_dir": "/tmp/iso-custom-work/extracted/live",
+    "patched_dir": "/tmp/iso-custom-work/patched"
+  },
+  "operations": {
+    "mount_iso": true,
+    "extract_iso": true,
+    "unsquashfs": true,
+    "inject_files": [
+      {
+        "source": "/etc/resolv.conf",
+        "target": "/etc/resolv.conf"
+      },
+      {
+        "inline_content": "Customized by JSON manifest\n",
+        "target": "/etc/customized-by.json"
+      }
+    ],
+    "chroot_patch": {
+      "enabled": true,
+      "commands": [
+        "apt update",
+        "apt install -y neofetch",
+        "echo 'echo Welcome to Custom ISO' > /etc/profile.d/welcome.sh",
+        "chmod +x /etc/profile.d/welcome.sh"
+      ]
+    },
+    "repack_squashfs": true,
+    "rebuild_iso": {
+      "enabled": true,
+      "isohybrid_mbr": "/tmp/iso-custom-work/extracted/isolinux/isohdpfx.bin",
+      "boot_catalog": "isolinux/boot.cat",
+      "boot_image": "isolinux/isolinux.bin"
+    }
+  }
+}
