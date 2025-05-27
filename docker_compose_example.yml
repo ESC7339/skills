@@ -20,9 +20,9 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: appdb
+      POSTGRES_USER: user_passed_as_env_var
+      POSTGRES_PASSWORD: password_passed_as_env_var
+      POSTGRES_DB: appdb_passed_as_env_var
     volumes:
       - db_data:/var/lib/postgresql/data
     restart: always
