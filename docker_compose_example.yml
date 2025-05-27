@@ -1,4 +1,4 @@
-# Docker Compose file: Web app with PostgreSQL and Redis services
+# Docker Compose file: Web app with PostgreSQL and Redis services, in reality we would pass all sensitive variables (if not all of them) from the environment to prevent sensitive data from being exposed on disk outside of OS user perm control
 
 
 services:
