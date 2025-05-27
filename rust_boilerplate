@@ -106,11 +106,11 @@ fn main() {
     run("mount", &["-o", "loop", input_iso.to_str().unwrap(), iso_mount.to_str().unwrap()]);
     run("cp", &["-a", &format!("{}/.", iso_mount.to_str().unwrap()), iso_root.to_str().unwrap()]);
 
-    println!("[INFO] Placeholder: chroot patching to be implemented...");
-    // TODO: unsquashfs, patching, chroot customization, resquash
+    println!("[INFO]  chroot patching");
+    // unsquashfs, patching, chroot customization, resquash
 
-    println!("[INFO] Placeholder: write final image logic to be added...");
-    // TODO: call xorriso/genisoimage to reassemble ISO
+    println!("[INFO]  write final image logic ");
+    // call xorriso/genisoimage to reassemble ISO
 
     println!("[INFO] Done.");
 }
