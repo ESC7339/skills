@@ -1,0 +1,67 @@
+---
+- name: ISO Customization Playbook
+  hosts: localhost
+  become: true
+  vars:
+    input_iso: /path/to/input.iso
+    output_iso: /tmp/output-custom.iso
+    workdir: /tmp/iso-workdir
+    mount_dir: "{{ workdir }}/mnt"
+    extract_dir: "{{ workdir }}/extracted"
+    squashfs_dir: "{{ extract_dir }}/live"
+    patched_dir: "{{ workdir }}/patched"
+
+  tasks:
+
+    - name: Create working directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - "{{ workdir }}"
+        - "{{ mount_dir }}"
+        - "{{ extract_dir }}"
+        - "{{ patched_dir }}"
+
+    - name: Mount ISO
+      command: mount -o loop "{{ input_iso }}" "{{ mount_dir }}"
+      register: mount_result
+      failed_when: mount_result.rc != 0
+      changed_when: false
+
+    - name: Copy ISO contents to working directory
+      command: cp -a "{{ mount_dir }}/." "{{ extract_dir }}"
+      args:
+        warn: false
+
+    - name: Unmount ISO
+      command: umount -lf "{{ mount_dir }}"
+      ignore_errors: true
+
+    - name: Unsquash the root filesystem
+      command: unsquashfs -d "{{ patched_dir }}" "{{ squashfs_dir }}/filesystem.squashfs"
+
+    - name: Inject customization marker
+      copy:
+        content: "Customized by Ansible\n"
+        dest: "{{ patched_dir }}/etc/ansible_customized"
+        mode: '0644'
+
+    - name: Copy resolv.conf into patched chroot (optional)
+      copy:
+        src: /etc/resolv.conf
+        dest: "{{ patched_dir }}/etc/resolv.conf"
+        mode: '0644'
+
+    - name: Rebuild the SquashFS image
+      command: mksquashfs "{{ patched_dir }}" "{{ squashfs_dir }}/filesystem.squashfs" -noappend
+      args:
+        warn: false
+
+    - name: Build final ISO image
+      command: >
+        xorriso -as mkisofs -o "{{ output_iso }}"
+        -isohybrid-mbr "{{ extract_dir }}/isolinux/isohdpfx.bin"
+        -c isolinux/boot.cat -b isolinux/isolinux.bin -no-emul-boot
+        -boot-load-size 4 -boot-info-table "{{ extract_dir }}"
