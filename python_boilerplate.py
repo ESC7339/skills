@@ -133,13 +133,13 @@ def main():
     log(f"Copying ISO contents to {isoroot}")
     run(["cp", "-a", f"{isomount}/.", str(isoroot)])
 
-    # Placeholder: unsquashfs / chroot patching
+    # unsquashfs / chroot patching
     log("Preparing chroot patching (placeholder)...")
-    # TODO: Extract squashfs, modify chrootdir, etc.
+    #  Extract squashfs, modify chrootdir, etc.
 
-    # Placeholder: generate final image
+    #  generate final image
     log(f"Writing final image to {output} (placeholder)...")
-    # TODO: mkisofs/genisoimage logic
+    #  mkisofs/genisoimage logic
 
     log("Script completed successfully.")
 
