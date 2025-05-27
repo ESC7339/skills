@@ -138,10 +138,10 @@ int main(int argc, char* argv[]) {
     run("cp -a " + isoMount.string() + "/. " + isoRoot.string());
 
     log("Preparing chroot patching (placeholder)...");
-    // TODO: unsquashfs, patch chroot, etc.
+    // unsquashfs, patch chroot, etc.
 
     log("Writing final image (placeholder) to: " + outputImage.string());
-    // TODO: genisoimage or mkisofs logic
+    // genisoimage or mkisofs logic
 
     log("Script completed successfully.");
     return EXIT_SUCCESS;
