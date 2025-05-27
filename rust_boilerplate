@@ -1,0 +1,116 @@
+use std::env;
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::process::{Command, exit};
+use std::os::unix::fs::PermissionsExt;
+use clap::{Arg, Command as ClapCommand};
+use tempfile::TempDir;
+use nix::unistd::Uid;
+
+fn abs_path(p: &str) -> PathBuf {
+    fs::canonicalize(p).unwrap_or_else(|_| PathBuf::from(p))
+}
+
+fn path_exists(p: &Path) -> bool {
+    p.exists() && p.is_file()
+}
+
+fn ensure_dir(p: &Path) {
+    if let Err(e) = fs::create_dir_all(p) {
+        eprintln!("[ERROR] Failed to create directory: {:?} - {}", p, e);
+        exit(1);
+    }
+}
+
+fn run(cmd: &str, args: &[&str]) {
+    println!("[INFO] Running: {} {}", cmd, args.join(" "));
+    let status = Command::new(cmd)
+        .args(args)
+        .status()
+        .expect("[ERROR] Failed to run command");
+    if !status.success() {
+        eprintln!("[ERROR] Command failed: {} {}", cmd, args.join(" "));
+        exit(1);
+    }
+}
+
+fn is_root() -> bool {
+    Uid::effective().is_root()
+}
+
+fn main() {
+    let matches = ClapCommand::new("iso-customizer")
+        .version("1.0")
+        .about("Customizes and builds a new Linux ISO image.")
+        .arg(Arg::new("input")
+            .short('i')
+            .long("input")
+            .required(true)
+            .takes_value(true)
+            .help("Input ISO path"))
+        .arg(Arg::new("output")
+            .short('o')
+            .long("output")
+            .takes_value(true)
+            .help("Output image path"))
+        .arg(Arg::new("workdir")
+            .short('w')
+            .long("workdir")
+            .takes_value(true)
+            .help("Working directory"))
+        .get_matches();
+
+    if !is_root() {
+        eprintln!("[ERROR] This tool must be run as root.");
+        exit(1);
+    }
+
+    let input_iso = abs_path(matches.value_of("input").unwrap());
+    if !path_exists(&input_iso) {
+        eprintln!("[ERROR] Input ISO does not exist: {:?}", input_iso);
+        exit(1);
+    }
+
+    let base_name = input_iso.file_stem().unwrap().to_string_lossy();
+    let output_img = abs_path(matches.value_of("output").unwrap_or(&format!("{}-custom.img", base_name)));
+
+    if !output_img.extension().map_or(false, |e| e == "img") {
+        eprintln!("[ERROR] Output file must have .img extension");
+        exit(1);
+    }
+
+    let temp_dir = match matches.value_of("workdir") {
+        Some(path) => PathBuf::from(path),
+        None => TempDir::new().expect("Failed to create temp dir").into_path()
+    };
+
+    let iso_mount = temp_dir.join("iso-mount");
+    let iso_root = temp_dir.join("iso-root");
+    let chroot_dir = temp_dir.join("chroot");
+
+    ensure_dir(&iso_mount);
+    ensure_dir(&iso_root);
+    ensure_dir(&chroot_dir);
+
+    ctrlc::set_handler(move || {
+        println!("\n[INFO] Caught interrupt. Cleaning up...");
+        let _ = Command::new("umount").arg("-lf").arg(&iso_mount).status();
+        let _ = fs::remove_dir_all(&temp_dir);
+        exit(1);
+    }).expect("Error setting Ctrl-C handler");
+
+    println!("[INFO] Input ISO: {:?}", input_iso);
+    println!("[INFO] Output Image: {:?}", output_img);
+    println!("[INFO] Working Directory: {:?}", temp_dir);
+
+    run("mount", &["-o", "loop", input_iso.to_str().unwrap(), iso_mount.to_str().unwrap()]);
+    run("cp", &["-a", &format!("{}/.", iso_mount.to_str().unwrap()), iso_root.to_str().unwrap()]);
+
+    println!("[INFO] Placeholder: chroot patching to be implemented...");
+    // TODO: unsquashfs, patching, chroot customization, resquash
+
+    println!("[INFO] Placeholder: write final image logic to be added...");
+    // TODO: call xorriso/genisoimage to reassemble ISO
+
+    println!("[INFO] Done.");
+}
