@@ -1,7 +1,6 @@
-#!/usr/bin/env pwsh
 
 #========================================
-# Robust PowerShell Script Boilerplate
+# PowerShell Script Boilerplate
 #========================================
 
 # Region: Strict Settings
@@ -14,7 +13,7 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     exit 1
 }
 
-# Region: Defaults
+# Defaults
 $WorkDir = ""
 $MountDir = ""
 $ChrootDir = ""
@@ -26,7 +25,7 @@ $Debug = $false
 $DoClean = $false
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
-# Region: Cleanup Handler
+# Cleanup Handler
 $cleanupScript = {
     Write-Host "[CLEANUP] Running cleanup..." -ForegroundColor Cyan
 
@@ -47,7 +46,7 @@ $cleanupScript = {
 }
 Register-EngineEvent PowerShell.Exiting -Action $cleanupScript | Out-Null
 
-# Region: Helpers
+# Helpers
 function Die($msg) {
     Write-Error "[ERROR] $msg"
     exit 1
@@ -56,7 +55,7 @@ function Log($msg) {
     Write-Host "[INFO] $msg"
 }
 
-# Region: Argument Parsing
+# Argument Parsing
 param(
     [string] $Input,
     [string] $OutputFile,
@@ -104,26 +103,26 @@ Log "Input ISO: $InputISO"
 Log "Output: $Output"
 Log "Workdir: $WorkDir (provided=$WorkDirProvided)"
 
-# Region: ISO Mount
+# ISO Mount
 Log "Mounting ISO..."
 Mount-DiskImage -ImagePath $InputISO -StorageType ISO -PassThru | Out-Null
 $MountedImage = Get-DiskImage -ImagePath $InputISO | Get-Volume
 $MountedPath = ($MountedImage.DriveLetter + ":\")
 Log "ISO mounted at $MountedPath"
 
-# Region: ISO Copy
+# ISO Copy
 $IsoRoot = Join-Path $WorkDir "iso-root"
 New-Item -ItemType Directory -Path $IsoRoot -Force | Out-Null
 Log "Copying ISO contents to $IsoRoot"
 Copy-Item -Path "$MountedPath*" -Destination $IsoRoot -Recurse -Force
 
-# Region: Placeholder for Unsquashfs / Chroot Patching
-Log "Preparing chroot patching (placeholder)..."
-# Place unsquashfs, chroot patch logic, or WSL patch commands here if desired
 
-# Region: Final Output Handling (Placeholder)
+Log "Preparing chroot patching (placeholder)..."
+# Place unsquashfs, chroot patch logic
+
+
 Log "Final output would be written to $Output"
-# This is where you’d integrate image creation, partitioning, etc.
+
 
 # Region: Manual Cleanup Trigger
 Write-Host "[FINISHED] All done. Triggering cleanup." -ForegroundColor Green
